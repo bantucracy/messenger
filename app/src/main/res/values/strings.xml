@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Ayanda Messenger</string>
+    <string name="message_hint">Say anything</string>
+    <string name="send">Send</string>
+    <string name="profile_me">My Profile Pic</string>
+    <string name="profile_other">Other profile pic</string>
+    <string name="btn_wifi_direct_discover">Discover</string>
+</resources>

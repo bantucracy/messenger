@@ -1,0 +1,2 @@
+include ':app', ':ayanda'
+rootProject.name='Messenger'
