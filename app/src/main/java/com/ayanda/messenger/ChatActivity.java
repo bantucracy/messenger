@@ -96,7 +96,6 @@ public class ChatActivity extends AppCompatActivity {
 
             }
         };
-        ayanda = Ayanda.createInstance(this, null, null, iWifiDirect);
     }
 
     void discoverPeersAndConnect() {

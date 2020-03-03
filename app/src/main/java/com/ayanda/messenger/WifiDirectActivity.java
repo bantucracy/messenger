@@ -30,7 +30,6 @@ public class WifiDirectActivity extends AppCompatActivity {
     private List peers = new ArrayList();
     private List peerNames = new ArrayList();
     private ArrayAdapter<String> peersAdapter = null;
-    private ArrayList<WifiP2pDevice> wdDevices;
     private Ayanda a;
 
     @Override
@@ -38,7 +37,7 @@ public class WifiDirectActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         createView();
         setListeners();
-        a = new Ayanda(this, null, null, new IWifiDirect() {
+        a = Ayanda.createInstance(this, null, null, new IWifiDirect() {
             @Override
             public void wifiP2pStateChangedAction(Intent intent) {
 
@@ -98,7 +97,13 @@ public class WifiDirectActivity extends AppCompatActivity {
             public void onClick(View v) {
                 switch (v.getId()) {
                     case R.id.btnWdDiscover:
-                        a.wdDiscover();
+                        if (a.isWDEnabled()) {
+                            Toast.makeText(getApplicationContext(), R.string.wd_available, Toast.LENGTH_SHORT).show();
+                            a.wdDiscover();
+                        } else {
+                            Toast.makeText(getApplicationContext(), R.string.wd_unavailable, Toast.LENGTH_SHORT).show();
+                        }
+
                         break;
                 }
             }
@@ -114,49 +119,19 @@ public class WifiDirectActivity extends AppCompatActivity {
         lvDevices.setOnItemClickListener(deviceClick);
     }
 
-    private void setupWifiDirect() {
-        IWifiDirect iWifiDirect = new IWifiDirect() {
-            @Override
-            public void wifiP2pStateChangedAction(Intent intent) {
-                // Wifi has been disabled or disabled
-            }
-
-            @Override
-            public void wifiP2pPeersChangedAction() {
-                // Number of Peers has changed
-                peers.clear();
-                // TODO fix error when WiFi off
-                peers.addAll(a.wdGetDevicesDiscovered());
-                peerNames.clear();
-                for (int i = 0; i < peers.size(); i++) {
-                    WifiP2pDevice device = (WifiP2pDevice) peers.get(i);
-                    peersAdapter.add(device.deviceName);
-                }
-                // Connect to a particular device
-
-            }
-
-            @Override
-            public void wifiP2pConnectionChangedAction(Intent intent) {
-                // Either connected to or Disconnected from device
-            }
-
-            @Override
-            public void wifiP2pThisDeviceChangedAction(Intent intent) {
-
-            }
-
-            @Override
-            public void onConnectedAsServer(Server server) {
-
-            }
-
-            @Override
-            public void onConnectedAsClient(InetAddress groupOwnerAddress) {
-
-            }
-        };
-        a = new Ayanda(this, null, null, iWifiDirect);
+  /* register the broadcast receiver with the intent values to be matched */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        a.wdRegisterReceivers();
     }
 
+    /* unregister the broadcast receiver */
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        super.onPause();
+        a.wdUnregisterReceivers();
+    }
 }

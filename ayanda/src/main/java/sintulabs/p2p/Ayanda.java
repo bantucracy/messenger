@@ -34,7 +34,7 @@ public class Ayanda {
      * @param iLan An interface to handle LAN (NSD/Bonjour/ZeroConfig/etc.,) events
      * @param iWifiDirect An interface to handle Wifi Direct events
      */
-    public Ayanda(Context context, IBluetooth iBluetooth, ILan iLan, IWifiDirect iWifiDirect) {
+    private Ayanda(Context context, IBluetooth iBluetooth, ILan iLan, IWifiDirect iWifiDirect) {
         this.context = context;
         if (iBluetooth != null) {
             bt = new Bluetooth(context, iBluetooth);
