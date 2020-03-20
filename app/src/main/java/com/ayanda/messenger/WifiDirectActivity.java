@@ -1,6 +1,8 @@
 package com.ayanda.messenger;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.os.Bundle;
 import android.view.View;
@@ -10,15 +12,17 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 import sintulabs.p2p.Ayanda;
 import sintulabs.p2p.IWifiDirect;
@@ -26,10 +30,12 @@ import sintulabs.p2p.Server;
 
 public class WifiDirectActivity extends AppCompatActivity {
     private Button btnWdDiscover;
+    private Button btnWdAnnounce;
     private ListView lvDevices;
     private List peers = new ArrayList();
     private List peerNames = new ArrayList();
     private ArrayAdapter<String> peersAdapter = null;
+    private final int FINE_LOCATION_CODE = 1000;
     private Ayanda a;
 
     @Override
@@ -81,6 +87,51 @@ public class WifiDirectActivity extends AppCompatActivity {
                 }).start();
             }
         });
+        setDeviceInfo();
+    }
+
+    private void checkPermissions(String permission, int requestCode) {
+        // IF permission not granted
+        if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[] {permission}, requestCode);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case FINE_LOCATION_CODE: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(getApplicationContext(), R.string.wd_available, Toast.LENGTH_SHORT).show();
+                    a.wdDiscover();
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+            case FINE_LOCATION_CODE + 1: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(getApplicationContext(), "Announcing", Toast.LENGTH_SHORT).show();
+                    a.wdAnnounce();
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+
+            }
+        }
+    }
+
+    private void setDeviceInfo() {
+        Random rand = new Random();
+        a.setDeviceName("Aya" + rand.nextInt(100000));
+        HashMap<String, String> txtRecords = new HashMap<>();
+        txtRecords.put("deviceName", a.getDeviceName());
+        a.wdSetTxtRecords(txtRecords);
     }
 
     private void createView() {
@@ -89,6 +140,7 @@ public class WifiDirectActivity extends AppCompatActivity {
         peersAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, peerNames);
         lvDevices.setAdapter(peersAdapter);
         btnWdDiscover = (Button) findViewById(R.id.btnWdDiscover);
+        btnWdAnnounce = (Button) findViewById(R.id.btnWdAnnounce);
     }
 
     private void setListeners() {
@@ -98,12 +150,13 @@ public class WifiDirectActivity extends AppCompatActivity {
                 switch (v.getId()) {
                     case R.id.btnWdDiscover:
                         if (a.isWDEnabled()) {
-                            Toast.makeText(getApplicationContext(), R.string.wd_available, Toast.LENGTH_SHORT).show();
-                            a.wdDiscover();
+                            checkPermissions(Manifest.permission.ACCESS_FINE_LOCATION, FINE_LOCATION_CODE);
                         } else {
                             Toast.makeText(getApplicationContext(), R.string.wd_unavailable, Toast.LENGTH_SHORT).show();
                         }
-
+                        break;
+                    case R.id.btnWdAnnounce:
+                        checkPermissions(Manifest.permission.ACCESS_FINE_LOCATION, FINE_LOCATION_CODE + 1);
                         break;
                 }
             }
@@ -116,6 +169,7 @@ public class WifiDirectActivity extends AppCompatActivity {
             }
         };
         btnWdDiscover.setOnClickListener(clickListener);
+        btnWdAnnounce.setOnClickListener(clickListener);
         lvDevices.setOnItemClickListener(deviceClick);
     }
 

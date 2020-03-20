@@ -31,5 +31,6 @@ dependencies {
     testImplementation 'org.robolectric:robolectric:4.3.1'
     implementation 'com.google.android.gms:play-services-location:11.8.0'
     api 'androidx.appcompat:appcompat:1.0.0'
+    compile project(':ayanda')
     testImplementation 'junit:junit:4.12'
 }

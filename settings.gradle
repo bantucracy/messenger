@@ -1,2 +1,3 @@
 include ':app', ':ayanda'
+project (':ayanda').projectDir = new File('../ayanda/ayanda')
 rootProject.name='Messenger'

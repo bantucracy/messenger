@@ -5,6 +5,7 @@
     <string name="profile_me">My Profile Pic</string>
     <string name="profile_other">Other profile pic</string>
     <string name="btn_wifi_direct_discover">Discover</string>
+    <string name="btn_wifi_direct_announce">Announce</string>
     <string name="wd_unavailable">Wifi Direct Unavailable</string>
     <string name="wd_available">Wifi Direct Available</string>
 </resources>
