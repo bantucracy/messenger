@@ -90,11 +90,14 @@ public class WifiDirectActivity extends AppCompatActivity {
         setDeviceInfo();
     }
 
-    private void checkPermissions(String permission, int requestCode) {
+    private boolean checkPermissions(String permission, int requestCode) {
         // IF permission not granted
         if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[] {permission}, requestCode);
+        } else {
+            return true;
         }
+        return false;
     }
 
     @Override
@@ -103,8 +106,7 @@ public class WifiDirectActivity extends AppCompatActivity {
             case FINE_LOCATION_CODE: {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(getApplicationContext(), R.string.wd_available, Toast.LENGTH_SHORT).show();
-                    a.wdDiscover();
+                    discover();
                 } else {
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
@@ -114,14 +116,12 @@ public class WifiDirectActivity extends AppCompatActivity {
             case FINE_LOCATION_CODE + 1: {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(getApplicationContext(), "Announcing", Toast.LENGTH_SHORT).show();
-                    a.wdAnnounce();
+
                 } else {
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
                 }
                 return;
-
             }
         }
     }
@@ -150,13 +150,17 @@ public class WifiDirectActivity extends AppCompatActivity {
                 switch (v.getId()) {
                     case R.id.btnWdDiscover:
                         if (a.isWDEnabled()) {
-                            checkPermissions(Manifest.permission.ACCESS_FINE_LOCATION, FINE_LOCATION_CODE);
+                            if (checkPermissions(Manifest.permission.ACCESS_FINE_LOCATION, FINE_LOCATION_CODE)) {
+                                discover();
+                            }
                         } else {
                             Toast.makeText(getApplicationContext(), R.string.wd_unavailable, Toast.LENGTH_SHORT).show();
                         }
                         break;
                     case R.id.btnWdAnnounce:
-                        checkPermissions(Manifest.permission.ACCESS_FINE_LOCATION, FINE_LOCATION_CODE + 1);
+                        if (checkPermissions(Manifest.permission.ACCESS_FINE_LOCATION, FINE_LOCATION_CODE + 1)) {
+                            announce();
+                        }
                         break;
                 }
             }
@@ -173,6 +177,14 @@ public class WifiDirectActivity extends AppCompatActivity {
         lvDevices.setOnItemClickListener(deviceClick);
     }
 
+    private void announce() {
+        Toast.makeText(getApplicationContext(), "Announcing", Toast.LENGTH_SHORT).show();
+        a.wdAnnounce();
+    }
+
+    private void discover() {
+        Toast.makeText(getApplicationContext(), R.string.wd_available, Toast.LENGTH_SHORT).show();
+        a.wdDiscover();    }
   /* register the broadcast receiver with the intent values to be matched */
     @Override
     protected void onResume() {
